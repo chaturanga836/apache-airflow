@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  airflow-webserver:
+    build: .
+    restart: always
+    environment:
+      - AIRFLOW__WEBSERVER__RBAC=True
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./webserver_config.py:/opt/airflow/webserver_config.py
+    ports:
+      - "8080:8080"
+    # ... other standard services (scheduler, postgres, redis)
