@@ -11,12 +11,13 @@ chmod -R 775 /opt/airflow/dags /opt/airflow/logs /opt/airflow/plugins
 # 2. AUTOMATED DB MIGRATION
 # This runs the migration using the airflow user
 echo "Running database migrations..."
-su-exec airflow airflow db migrate
+gosu airflow airflow db migrate
 
 # 3. AUTOMATED ADMIN CREATION
 # Only runs if the user doesn't exist
+
 echo "Ensuring Admin user exists..."
-su-exec airflow airflow users create \
+gosu airflow airflow users create \
     --username admin \
     --firstname Admin \
     --lastname User \
@@ -27,4 +28,4 @@ su-exec airflow airflow users create \
 # 4. HAND OFF TO AIRFLOW
 # Executes the command from docker-compose (webserver or scheduler)
 echo "Starting Airflow with command: $@"
-exec su-exec airflow "$@"
+exec gosu airflow "$@"
