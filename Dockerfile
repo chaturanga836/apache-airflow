@@ -11,7 +11,7 @@ RUN apt-get update && \
 
 # 2. Add your corporate LDAP CA certificate
 # Replace 'ldap-ca.crt' with your actual certificate file name
-COPY ./certs/ldap-ca.crt /usr/local/share/ca-certificates/ldap-ca.crt
+COPY ./certs/ca.crt /usr/local/share/ca-certificates/ldap-ca.crt
 RUN update-ca-certificates
 
 USER airflow

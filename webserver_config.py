@@ -1,27 +1,27 @@
 import os
 from flask_appbuilder.security.manager import AUTH_LDAP
 
-# Enable LDAP Authentication
 AUTH_TYPE = AUTH_LDAP
+AUTH_LDAP_SERVER = f"ldaps://{os.environ.get('LDAP_SERVER_IP')}:636"
+AUTH_LDAP_USE_TLS = False # Set to False because we are using port 636 (Direct SSL)
 
-# LDAP Server Details (Use ldaps:// for SSL)
-AUTH_LDAP_SERVER = "ldaps://your-ldap-server.com:636"
+# Bind Settings
+AUTH_LDAP_BIND_USER = os.environ.get("LDAP_BIND_USER")
+AUTH_LDAP_BIND_PASSWORD = os.environ.get("LDAP_BIND_PASSWORD")
 
-# This should point to the certificate we copied in the Dockerfile
-AUTH_LDAP_TLS_CACERTFILE = "/etc/ssl/certs/ldap-ca.crt"
+# Search Settings
+AUTH_LDAP_SEARCH = "dc=example,dc=com"
+AUTH_LDAP_UID_FIELD = "uid"
+AUTH_LDAP_SEARCH_SCOPE = 2 # Subtree search to find users in ou=IT and ou=Marketing
 
-# LDAP Search Settings
-AUTH_LDAP_SEARCH = "ou=users,dc=example,dc=com"
-AUTH_LDAP_UID_FIELD = "uid"  # or 'sAMAccountName' for Active Directory
-AUTH_LDAP_BIND_USER = "cn=read-only-admin,dc=example,dc=com"
-AUTH_LDAP_BIND_PASSWORD = "your-bind-password"
+# Trust the cert we copied into the container
+AUTH_LDAP_TLS_CACERTFILE = "/etc/ssl/certs/ca-certificates.crt"
 
-# Map LDAP groups to Airflow roles
+# Group Mapping
 AUTH_ROLES_MAPPING = {
-    "cn=airflow_admins,ou=groups,dc=example,dc=com": ["Admin"],
-    "cn=airflow_users,ou=groups,dc=example,dc=com": ["User"],
+    "cn=it_users,ou=Groups,dc=example,dc=com": ["Admin"],
+    "cn=marketing_users,ou=Groups,dc=example,dc=com": ["User"],
 }
 
-# Allow users to be created automatically on first login
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Public"
