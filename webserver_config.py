@@ -26,7 +26,8 @@ AUTH_ROLE_ADMIN = "Admin"
 # Use your actual server IP and LDAP SSL port if applicable
 # Since your note says LDAP SSL, ensure this matches your requirement
 AUTH_LDAP_SERVER = f"ldap://{os.environ.get('LDAP_SERVER_IP')}:389"
-
+AUTH_LDAP_SEARCH_SCOPE = 2
+AUTH_LDAP_BIND_DIRECT = False
 # Registration configs
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Public" # Fallback role
