@@ -23,3 +23,15 @@ RUN pip install --no-cache-dir \
     "python-ldap" \
     "ldap3" \
     --constraint "${CONSTRAINT_URL}"
+
+USER root
+
+# Install su-exec to safely switch from root to airflow user
+RUN apt-get update && apt-get install -y su-exec && apt-get clean
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Run as root initially so the script can fix permissions
+USER root
+ENTRYPOINT ["/entrypoint.sh"]
