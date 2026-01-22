@@ -12,9 +12,9 @@ RUN chmod 644 /usr/local/share/ca-certificates/ldap-server.crt && update-ca-cert
 USER airflow
 
 # 1. Define the Constraint URL for your specific Airflow and Python version
-ARG PYTHON_VERSION=3.8
+ARG AIRFLOW_PY_VERSION=3.8
 # (Note: Check if your base image uses 3.8, 3.9, etc. by running 'python --version' in it)
-ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-2.7.2/constraints-${PYTHON_VERSION}.txt"
+ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-2.7.2/constraints-${AIRFLOW_PY_VERSION}.txt"
 
 # 2. Install using the constraints file to prevent breaking dependencies
 RUN pip install --no-cache-dir \
