@@ -10,9 +10,11 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__WEBSERVER__RBAC=True
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - LDAP_SERVER_IP=144.24.127.112
-      - LDAP_BIND_USER=cn=admin,dc=example,dc=com
-      - LDAP_BIND_PASSWORD=admin123
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=adminpassword123
+      - _AIRFLOW_WWW_USER_ROLE=Admin
+      - _AIRFLOW_WWW_USER_EMAIL=admin@example.com
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
