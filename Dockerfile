@@ -26,8 +26,8 @@ RUN pip install --no-cache-dir \
 
 USER root
 
-# Install su-exec to safely switch from root to airflow user
-RUN apt-get update && apt-get install -y su-exec && apt-get clean
+# Install gosu to safely switch from root to airflow user
+RUN apt-get update && apt-get install -y gosu && apt-get clean
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
