@@ -10,8 +10,8 @@ AUTH_LDAP_BIND_USER = os.environ.get("LDAP_BIND_USER")
 AUTH_LDAP_BIND_PASSWORD = os.environ.get("LDAP_BIND_PASSWORD")
 
 # Search Settings
-AUTH_LDAP_SEARCH = "dc=example,dc=com"
-AUTH_LDAP_UID_FIELD = "uid"
+AUTH_LDAP_SEARCH = os.environ.get("AUTH_LDAP_SEARCH")  # e.g., "dc=example,dc=com"
+AUTH_LDAP_UID_FIELD = os.environ.get("AUTH_LDAP_UID_FIELD")  # e.g., "uid"
 AUTH_LDAP_SEARCH_SCOPE = 2 # Subtree search to find users in ou=IT and ou=Marketing
 
 # Trust the cert we copied into the container
