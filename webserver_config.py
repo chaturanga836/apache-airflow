@@ -2,7 +2,7 @@ import os
 import logging
 from airflow import configuration as conf
 from flask_appbuilder.security.manager import AUTH_LDAP
-from flask_appbuilder.security.manager import GroupOfNamesType
+import ldap
 SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
 CSRF_ENABLED = True
 
@@ -27,7 +27,6 @@ AUTH_ROLE_ADMIN = "Admin"
 # Since your note says LDAP SSL, ensure this matches your requirement
 AUTH_LDAP_SERVER = f"ldap://{os.environ.get('LDAP_SERVER_IP')}:389"
 AUTH_LDAP_SEARCH_SCOPE = 2
-AUTH_LDAP_BIND_DIRECT = False
 # Registration configs
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Public" # Fallback role
@@ -41,12 +40,14 @@ AUTH_LDAP_UID_FIELD = os.environ.get("AUTH_LDAP_UID_FIELD")
 AUTH_LDAP_BIND_USER = os.environ.get("LDAP_BIND_USER")
 AUTH_LDAP_BIND_PASSWORD = os.environ.get("LDAP_BIND_PASSWORD")
 
+AUTH_LDAP_BIND_DIRECT = False
+AUTH_LDAP_BIND_USER_TEMPLATE = "uid={username}," + AUTH_LDAP_SEARCH
 # --- THE KEY FIXES ---
 
 # 1. Match your LDIF attribute name exactly
 AUTH_LDAP_GROUP_FIELD = "member" 
 AUTH_LDAP_GROUP_SEARCH = "ou=Groups,dc=example,dc=com"
-AUTH_LDAP_GROUP_TYPE = GroupOfNamesType()
+AUTH_LDAP_GROUP_TYPE = "groupOfNames"
 # 2. Use the exact DNs from your successful ldapsearch
 AUTH_ROLES_MAPPING = {
     "cn=it_users,ou=Groups,dc=example,dc=com": ["Admin"],
