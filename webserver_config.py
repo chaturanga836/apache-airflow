@@ -2,7 +2,7 @@ import os
 from flask_appbuilder.security.manager import AUTH_LDAP
 
 AUTH_TYPE = AUTH_LDAP
-AUTH_LDAP_SERVER = f"ldaps://{os.environ.get('LDAP_SERVER_IP')}:636"
+AUTH_LDAP_SERVER = f"ldap://{os.environ.get('LDAP_SERVER_IP')}:389"
 AUTH_LDAP_USE_TLS = False # Set to False because we are using port 636 (Direct SSL)
 
 # Bind Settings
