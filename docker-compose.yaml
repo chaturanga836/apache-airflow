@@ -2,13 +2,28 @@ version: '3.8'
 services:
   airflow-webserver:
     build: .
-    restart: always
+    container_name: airflow-server
     environment:
+      # Connection String format: postgresql+psycopg2://user:password@host:port/dbname
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow_user:your_password@144.24.127.XXX:5432/airflow_db
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__WEBSERVER__RBAC=True
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./webserver_config.py:/opt/airflow/webserver_config.py
     ports:
       - "8080:8080"
-    # ... other standard services (scheduler, postgres, redis)
+    command: webserver
+
+  airflow-scheduler:
+    build: .
+    container_name: airflow-scheduler
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow_user:your_password@144.24.127.XXX:5432/airflow_db
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+    command: scheduler
