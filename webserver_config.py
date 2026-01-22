@@ -34,6 +34,7 @@ AUTH_LDAP_FIRSTNAME_FIELD = "cn"       # Based on your LDIF
 AUTH_LDAP_LASTNAME_FIELD = "sn"
 AUTH_LDAP_EMAIL_FIELD = "mail"
 
+AUTH_LDAP_GROUP_FIELD_IS_DN = True
 # Search configs - MUST be the top level to see ou=IT and ou=Groups
 AUTH_LDAP_SEARCH = os.environ.get("AUTH_LDAP_SEARCH")
 AUTH_LDAP_UID_FIELD = os.environ.get("AUTH_LDAP_UID_FIELD") 
