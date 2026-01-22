@@ -1,9 +1,17 @@
 import os
+import logging
 from airflow import configuration as conf
 from flask_appbuilder.security.manager import AUTH_LDAP
 
 SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
 CSRF_ENABLED = True
+
+print("--- DEBUGGING LDAP ENV VARS ---")
+print(f"LDAP_SERVER_IP: {os.environ.get('LDAP_SERVER_IP')}")
+print(f"AUTH_LDAP_SEARCH: {os.environ.get('AUTH_LDAP_SEARCH')}")
+print(f"LDAP_BIND_USER: {os.environ.get('LDAP_BIND_USER')}")
+print(f"AUTH_LDAP_UID_FIELD: {os.environ.get('AUTH_LDAP_UID_FIELD')}")
+print("-------------------------------")
 
 AUTH_TYPE = AUTH_LDAP
 AUTH_ROLE_ADMIN = "Admin"
