@@ -14,8 +14,11 @@ AUTH_LDAP_SEARCH = os.environ.get("AUTH_LDAP_SEARCH")  # e.g., "dc=example,dc=co
 AUTH_LDAP_UID_FIELD = os.environ.get("AUTH_LDAP_UID_FIELD")  # e.g., "uid"
 AUTH_LDAP_SEARCH_SCOPE = 2 # Subtree search to find users in ou=IT and ou=Marketing
 AUTH_USER_REGISTRATION = True
-AUTH_USER_REGISTRATION_ROLE = "Public"
+AUTH_USER_REGISTRATION_ROLE = "Admin"
 
+AUTH_LDAP_GROUP_FIELD = "member"
+AUTH_LDAP_GROUP_SEARCH = "ou=Groups,dc=example,dc=com"
+AUTH_LDAP_GROUP_SEARCH_SCOPE = 2
 # Trust the cert we copied into the container
 # AUTH_LDAP_TLS_CACERTFILE = "/etc/ssl/certs/ca-certificates.crt"
 
