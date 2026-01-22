@@ -3,11 +3,16 @@ services:
   airflow-webserver:
     build: .
     container_name: airflow-server
+    env_file:
+      - .env
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:2324@144.24.127.112:5432/airflow_db
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__WEBSERVER__RBAC=True
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - LDAP_SERVER_IP=144.24.127.112
+      - LDAP_BIND_USER=cn=admin,dc=example,dc=com
+      - LDAP_BIND_PASSWORD=admin123
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
