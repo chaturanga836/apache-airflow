@@ -6,12 +6,19 @@ from flask_appbuilder.security.manager import AUTH_LDAP
 SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
 CSRF_ENABLED = True
 
-print("--- DEBUGGING LDAP ENV VARS ---")
-print(f"LDAP_SERVER_IP: {os.environ.get('LDAP_SERVER_IP')}")
-print(f"AUTH_LDAP_SEARCH: {os.environ.get('AUTH_LDAP_SEARCH')}")
-print(f"LDAP_BIND_USER: {os.environ.get('LDAP_BIND_USER')}")
-print(f"AUTH_LDAP_UID_FIELD: {os.environ.get('AUTH_LDAP_UID_FIELD')}")
-print("-------------------------------")
+log = logging.getLogger("flask_appbuilder.security.manager")
+log.setLevel(logging.DEBUG)
+
+# 2. ENV VAR CHECK
+print("--- START LDAP CONFIG DEBUG ---")
+ldap_ip = os.environ.get('LDAP_SERVER_IP')
+search_base = os.environ.get("AUTH_LDAP_SEARCH")
+bind_user = os.environ.get("LDAP_BIND_USER")
+
+print(f"IP: {ldap_ip}")
+print(f"Search Base: {search_base}")
+print(f"Bind User: {bind_user}")
+print("--- END LDAP CONFIG DEBUG ---")
 
 AUTH_TYPE = AUTH_LDAP
 AUTH_ROLE_ADMIN = "Admin"
