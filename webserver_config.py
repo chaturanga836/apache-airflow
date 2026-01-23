@@ -29,7 +29,7 @@ AUTH_LDAP_SERVER = f"ldap://144.24.127.112:389"
 AUTH_LDAP_SEARCH_SCOPE = 2
 # Registration configs
 
-AUTH_USER_REGISTRATION_ROLE = "Public" # Fallback role
+AUTH_USER_REGISTRATION_ROLE = "Admin" # Fallback role
 AUTH_LDAP_FIRSTNAME_FIELD = "uid"       # Based on your LDIF
 AUTH_LDAP_LASTNAME_FIELD = "sn"
 AUTH_LDAP_EMAIL_FIELD = "mail"
