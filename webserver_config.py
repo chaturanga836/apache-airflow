@@ -45,11 +45,13 @@ AUTH_LDAP_GROUP_FIELD = "member"
 AUTH_LDAP_GROUP_SEARCH = "dc=example,dc=com" # Broaden to root to ensure we don't miss ou=Groups
 AUTH_LDAP_GROUP_TYPE = "groupOfNames"
 AUTH_LDAP_GROUP_SEARCH_SCOPE = 2 # Subtree search
-
+AUTH_LDAP_SEARCH_FILTER = "(objectClass=inetOrgPerson)" # Or whatever Anna's objectClass is
+AUTH_LDAP_GROUP_SEARCH_FILTER = "(objectClass=groupOfNames)"
+AUTH_LDAP_GROUP_PULL_ALL_SEARCH = True
 # Use EXACT strings from your successful ldapsearch
 AUTH_ROLES_MAPPING = {
     "cn=it_users,ou=Groups,dc=example,dc=com": ["Admin"],
-    "cn=marketing_users,ou=Groups,dc=example,dc=com": ["User"],
+    "it_users": ["Admin"], # Added as a fallback
 }
 
 AUTH_LDAP_CONNECTION_OPTIONS = {
