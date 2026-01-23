@@ -1,12 +1,19 @@
 import os
 import logging
 import sys
-from airflow import configuration as conf
-from flask_appbuilder.security.manager import AUTH_LDAP
 import ldap
+from flask_appbuilder.security.manager import AUTH_LDAP
 
-SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
+# --- AIRFLOW 3 FIX: Avoid conf.get attribute error ---
+# Pulling the DB connection directly from the environment
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
+    "postgresql+psycopg2://postgres:2324@144.24.127.112:5432/airflow_db"
+)
+
 CSRF_ENABLED = True
+
+# Debug Logging
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 handler = logging.StreamHandler(sys.stdout)
@@ -14,68 +21,49 @@ handler.setFormatter(logging.Formatter('%(levelname)s:%(name)s:%(message)s'))
 root.addHandler(handler)
 
 logging.getLogger("flask_appbuilder.security.manager").setLevel(logging.DEBUG)
-logging.getLogger("flask_appbuilder.api.manager").setLevel(logging.DEBUG)
 logging.getLogger("ldap").setLevel(logging.DEBUG)
-# 2. ENV VAR CHECK
-print("--- START LDAP CONFIG DEBUG ---")
-ldap_ip = os.environ.get('LDAP_SERVER_IP')
-search_base = os.environ.get("AUTH_LDAP_SEARCH")
-bind_user = os.environ.get("LDAP_BIND_USER")
 
-print(f"IP: {ldap_ip}")
-print(f"Search Base: {search_base}")
-print(f"Bind User: {bind_user}")
-print("--- END LDAP CONFIG DEBUG ---")
-
+# --- LDAP SSL CONFIGURATION ---
 AUTH_TYPE = AUTH_LDAP
 AUTH_ROLE_ADMIN = "Admin"
+AUTH_ROLE_PUBLIC = "Public"
 
-# Use your actual server IP and LDAP SSL port if applicable
-# Since your note says LDAP SSL, ensure this matches your requirement
-AUTH_LDAP_SERVER = f"ldap://144.24.127.112:389"
-AUTH_LDAP_SEARCH_SCOPE = 2
-# Registration configs
+# Updated to LDAPS per your 2026-01-19 note
+AUTH_LDAP_SERVER = "ldaps://144.24.127.112:636"
+AUTH_LDAP_USE_TLS = False  # Set to False when using ldaps:// (TLS is implicit)
+AUTH_LDAP_ALLOW_SELF_SIGNED = True
 
-AUTH_USER_REGISTRATION_ROLE = "Public" # Fallback role
-AUTH_LDAP_FIRSTNAME_FIELD = "uid"       # Based on your LDIF
-AUTH_LDAP_LASTNAME_FIELD = "sn"
-AUTH_LDAP_EMAIL_FIELD = "mail"
-
-AUTH_LDAP_GROUP_FIELD_IS_DN = True
-# Search configs - MUST be the top level to see ou=IT and ou=Groups
+# Search & Bind
 AUTH_LDAP_SEARCH = "dc=example,dc=com"
 AUTH_LDAP_UID_FIELD = "uid"
 AUTH_LDAP_BIND_USER = "cn=admin,dc=example,dc=com"
 AUTH_LDAP_BIND_PASSWORD = "admin123"
-
 AUTH_LDAP_BIND_DIRECT = False
-# --- THE KEY FIXES ---
 
-# 1. Match your LDIF attribute name exactly
+# Registration & Mapping
+AUTH_USER_REGISTRATION = True
+AUTH_USER_REGISTRATION_ROLE = "Public"
+AUTH_ROLES_SYNC_AT_LOGIN = True
+
+AUTH_LDAP_FIRSTNAME_FIELD = "uid"
+AUTH_LDAP_LASTNAME_FIELD = "sn"
+AUTH_LDAP_EMAIL_FIELD = "mail"
+
+# Group Membership Logic
+AUTH_LDAP_GROUP_FIELD_IS_DN = True
 AUTH_LDAP_GROUP_FIELD = "member" 
 AUTH_LDAP_GROUP_SEARCH = "ou=Groups,dc=example,dc=com"
 AUTH_LDAP_GROUP_TYPE = "groupOfNames"
-# 2. Use the exact DNs from your successful ldapsearch
+
+# Role Mapping
 AUTH_ROLES_MAPPING = {
-    "uid=anna.meier,ou=IT,dc=example,dc=com": ["Admin"],
-    "CN=it_users,ou=Groups,dc=example,dc=com": ["Admin"], # Added uppercase variant
+    "cn=it_users,ou=Groups,dc=example,dc=com": ["Admin"],
     "cn=marketing_users,ou=Groups,dc=example,dc=com": ["User"],
-    "CN=marketing_users,ou=Groups,dc=example,dc=com": ["User"], # Added uppercase variant
 }
-
-AUTH_ROLES_SYNC_AT_LOGIN = True
-AUTH_USER_REGISTRATION = True
-PERMANENT_SESSION_LIFETIME = 1800
-
-# TLS / SSL Settings
-# If using port 636, set AUTH_LDAP_USE_TLS = True or use ldaps://
-AUTH_LDAP_USE_TLS = False 
-AUTH_LDAP_ALLOW_SELF_SIGNED = True
-
-AUTH_LDAP_GROUP_SEARCH_SCOPE = 2
 
 AUTH_LDAP_CONNECTION_OPTIONS = {
-    ldap.OPT_REFERRALS: 0
+    ldap.OPT_REFERRALS: 0,
+    ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER # Useful for self-signed certificates
 }
 
-AUTH_ROLE_PUBLIC = "Public"  # Default role for unauthenticated users
+PERMANENT_SESSION_LIFETIME = 1800
