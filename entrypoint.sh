@@ -12,6 +12,8 @@ gosu airflow airflow db migrate
 
 # 3. AUTOMATED ADMIN CREATION
 echo "Ensuring Admin user exists..."
+gosu airflow airflow sync-perm
+
 gosu airflow airflow users create \
     --username admin \
     --firstname Admin \
