@@ -48,8 +48,8 @@ AUTH_LDAP_GROUP_SEARCH_SCOPE = 2 # Subtree search
 AUTH_LDAP_SEARCH_FILTER = "(objectClass=inetOrgPerson)" # Or whatever Anna's objectClass is
 AUTH_LDAP_GROUP_SEARCH_FILTER = "(objectClass=groupOfNames)"
 AUTH_LDAP_GROUP_PULL_ALL_SEARCH = True
-AUTH_LDAP_USER_REGISTRATION_FIELDS = ["uid", "mail", "sn", "memberOf"]
-AUTH_LDAP_SEARCH_ATTRS = ["uid", "mail", "sn"]
+AUTH_LDAP_USER_REGISTRATION_FIELDS = ["uid", "mail", "sn", "member"]
+AUTH_LDAP_SEARCH_ATTRS = ["uid", "mail", "sn", "member"]
 # Use EXACT strings from your successful ldapsearch
 AUTH_ROLES_MAPPING = {
     "cn=it_users,ou=Groups,dc=example,dc=com": ["Admin"],
