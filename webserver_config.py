@@ -41,7 +41,7 @@ AUTH_LDAP_EMAIL_FIELD = "mail"
 AUTH_LDAP_GROUP_PULL_ALL_SEARCH = True
 # --- THE CRITICAL GROUP SEARCH FIXES ---
 AUTH_LDAP_GROUP_FIELD_IS_DN = True  # Your search used the full User DN
-AUTH_LDAP_GROUP_FIELD = "uid" 
+AUTH_LDAP_GROUP_FIELD = "member" 
 AUTH_LDAP_GROUP_SEARCH = "dc=example,dc=com" # Broaden to root to ensure we don't miss ou=Groups
 AUTH_LDAP_GROUP_TYPE = "groupOfNames"
 AUTH_LDAP_GROUP_SEARCH_SCOPE = 2 # Subtree search
@@ -50,6 +50,7 @@ AUTH_LDAP_GROUP_SEARCH_FILTER = "(objectClass=groupOfNames)"
 AUTH_LDAP_GROUP_PULL_ALL_SEARCH = True
 AUTH_LDAP_USER_REGISTRATION_FIELDS = ["uid", "mail", "sn", "member"]
 AUTH_LDAP_SEARCH_ATTRS = ["uid", "mail", "sn", "member"]
+AUTH_LDAP_USE_NESTED_GROUPS_FOR_ROLES = True
 # Use EXACT strings from your successful ldapsearch
 AUTH_ROLES_MAPPING = {
     "cn=it_users,ou=Groups,dc=example,dc=com": ["Admin"],
