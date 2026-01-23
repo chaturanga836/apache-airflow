@@ -42,7 +42,6 @@ AUTH_LDAP_BIND_USER = "cn=admin,dc=example,dc=com"
 AUTH_LDAP_BIND_PASSWORD = "admin123"
 
 AUTH_LDAP_BIND_DIRECT = False
-AUTH_LDAP_BIND_USER_TEMPLATE = "uid={username}," + AUTH_LDAP_SEARCH
 # --- THE KEY FIXES ---
 
 # 1. Match your LDIF attribute name exactly
