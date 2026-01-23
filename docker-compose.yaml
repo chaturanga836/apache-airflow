@@ -19,7 +19,7 @@ services:
       - ./webserver_config.py:/opt/airflow/webserver_config.py
     ports:
       - "8080:8080"
-    command: webserver
+    command: api-server
     # Added healthcheck so the scheduler knows when the webserver is ready
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
