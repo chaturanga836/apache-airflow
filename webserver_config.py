@@ -6,9 +6,9 @@ import ldap
 SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
 CSRF_ENABLED = True
 
-log = logging.getLogger("flask_appbuilder.security.manager")
-log.setLevel(logging.DEBUG)
-
+logging.getLogger("flask_appbuilder.security.manager").setLevel(logging.DEBUG)
+logging.getLogger("flask_appbuilder.api.manager").setLevel(logging.DEBUG)
+logging.getLogger("ldap").setLevel(logging.DEBUG)
 # 2. ENV VAR CHECK
 print("--- START LDAP CONFIG DEBUG ---")
 ldap_ip = os.environ.get('LDAP_SERVER_IP')
