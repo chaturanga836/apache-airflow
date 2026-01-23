@@ -13,7 +13,7 @@ gosu airflow airflow db migrate
 # 3. AUTOMATED ADMIN CREATION
 echo "Ensuring Admin user exists..."
 #Use the new provider-based command structure
-gosu airflow airflow fab sync-perm
+gosu airflow airflow sync-perm
 
 gosu airflow airflow providers fab users-create \
     --username admin \
