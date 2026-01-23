@@ -3,8 +3,14 @@ import logging
 from airflow import configuration as conf
 from flask_appbuilder.security.manager import AUTH_LDAP
 import ldap
+
 SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")
 CSRF_ENABLED = True
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('%(levelname)s:%(name)s:%(message)s'))
+root.addHandler(handler)
 
 logging.getLogger("flask_appbuilder.security.manager").setLevel(logging.DEBUG)
 logging.getLogger("flask_appbuilder.api.manager").setLevel(logging.DEBUG)
