@@ -57,6 +57,7 @@ AUTH_LDAP_GROUP_TYPE = "groupOfNames"
 
 # Role Mapping
 AUTH_ROLES_MAPPING = {
+    "ou=IT,dc=example,dc=com": ["Admin"],
     "cn=it_users,ou=Groups,dc=example,dc=com": ["Admin"],
     "cn=marketing_users,ou=Groups,dc=example,dc=com": ["User"],
 }
