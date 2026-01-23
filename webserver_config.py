@@ -23,6 +23,7 @@ root.addHandler(handler)
 logging.getLogger("flask_appbuilder.security.manager").setLevel(logging.DEBUG)
 logging.getLogger("ldap").setLevel(logging.DEBUG)
 
+SECRET_KEY = os.environ.get('AIRFLOW__WEBSERVER__SECRET_KEY', 'your-very-secure-random-string-here')
 # --- LDAP SSL CONFIGURATION ---
 AUTH_TYPE = AUTH_LDAP
 AUTH_ROLE_ADMIN = "Admin"
