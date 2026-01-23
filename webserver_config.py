@@ -25,21 +25,21 @@ AUTH_ROLE_ADMIN = "Admin"
 
 # Use your actual server IP and LDAP SSL port if applicable
 # Since your note says LDAP SSL, ensure this matches your requirement
-AUTH_LDAP_SERVER = f"ldap://{os.environ.get('LDAP_SERVER_IP')}:389"
+AUTH_LDAP_SERVER = f"ldap://144.24.127.112:389"
 AUTH_LDAP_SEARCH_SCOPE = 2
 # Registration configs
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Public" # Fallback role
-AUTH_LDAP_FIRSTNAME_FIELD = "cn"       # Based on your LDIF
+AUTH_LDAP_FIRSTNAME_FIELD = "uid"       # Based on your LDIF
 AUTH_LDAP_LASTNAME_FIELD = "sn"
 AUTH_LDAP_EMAIL_FIELD = "mail"
 
 AUTH_LDAP_GROUP_FIELD_IS_DN = True
 # Search configs - MUST be the top level to see ou=IT and ou=Groups
-AUTH_LDAP_SEARCH = os.environ.get("AUTH_LDAP_SEARCH")
-AUTH_LDAP_UID_FIELD = os.environ.get("AUTH_LDAP_UID_FIELD") 
-AUTH_LDAP_BIND_USER = os.environ.get("LDAP_BIND_USER")
-AUTH_LDAP_BIND_PASSWORD = os.environ.get("LDAP_BIND_PASSWORD")
+AUTH_LDAP_SEARCH = "dc=example,dc=com"
+AUTH_LDAP_UID_FIELD = "uid"
+AUTH_LDAP_BIND_USER = "cn=admin,dc=example,dc=com"
+AUTH_LDAP_BIND_PASSWORD = "admin123"
 
 AUTH_LDAP_BIND_DIRECT = False
 AUTH_LDAP_BIND_USER_TEMPLATE = "uid={username}," + AUTH_LDAP_SEARCH
