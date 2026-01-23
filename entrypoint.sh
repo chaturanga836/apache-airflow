@@ -12,15 +12,16 @@ gosu airflow airflow db migrate
 
 # 3. AUTOMATED ADMIN CREATION
 echo "Ensuring Admin user exists..."
-gosu airflow airflow sync-perm
+#Use the new provider-based command structure
+gosu airflow airflow providers fab sync-permissions
 
-gosu airflow airflow users create \
+gosu airflow airflow providers fab users-create \
     --username admin \
     --firstname Admin \
     --lastname User \
     --role Admin \
     --email admin@example.com \
-    --password admin || true
+    --password admin || echo "Admin already exists or sync-perm handled it."
 
 # 4. HAND OFF TO AIRFLOW
 # Executes the command from docker-compose (webserver, scheduler, etc.)
