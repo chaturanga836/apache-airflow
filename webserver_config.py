@@ -1,5 +1,6 @@
 import os
 import logging
+import sys
 from airflow import configuration as conf
 from flask_appbuilder.security.manager import AUTH_LDAP
 import ldap
