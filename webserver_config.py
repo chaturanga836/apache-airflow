@@ -51,7 +51,9 @@ AUTH_LDAP_GROUP_TYPE = "groupOfNames"
 # 2. Use the exact DNs from your successful ldapsearch
 AUTH_ROLES_MAPPING = {
     "cn=it_users,ou=Groups,dc=example,dc=com": ["Admin"],
+    "CN=it_users,ou=Groups,dc=example,dc=com": ["Admin"], # Added uppercase variant
     "cn=marketing_users,ou=Groups,dc=example,dc=com": ["User"],
+    "CN=marketing_users,ou=Groups,dc=example,dc=com": ["User"], # Added uppercase variant
 }
 
 AUTH_ROLES_SYNC_AT_LOGIN = True
