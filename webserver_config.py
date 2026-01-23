@@ -28,7 +28,7 @@ AUTH_ROLE_ADMIN = "Admin"
 AUTH_LDAP_SERVER = f"ldap://144.24.127.112:389"
 AUTH_LDAP_SEARCH_SCOPE = 2
 # Registration configs
-AUTH_USER_REGISTRATION = True
+
 AUTH_USER_REGISTRATION_ROLE = "Public" # Fallback role
 AUTH_LDAP_FIRSTNAME_FIELD = "uid"       # Based on your LDIF
 AUTH_LDAP_LASTNAME_FIELD = "sn"
@@ -55,9 +55,18 @@ AUTH_ROLES_MAPPING = {
 }
 
 AUTH_ROLES_SYNC_AT_LOGIN = True
+AUTH_USER_REGISTRATION = True
 PERMANENT_SESSION_LIFETIME = 1800
 
 # TLS / SSL Settings
 # If using port 636, set AUTH_LDAP_USE_TLS = True or use ldaps://
 AUTH_LDAP_USE_TLS = False 
 AUTH_LDAP_ALLOW_SELF_SIGNED = True
+
+AUTH_LDAP_GROUP_SEARCH_SCOPE = 2
+
+AUTH_LDAP_CONNECTION_OPTIONS = {
+    ldap.OPT_REFERRALS: 0
+}
+
+AUTH_ROLE_PUBLIC = "Public"  # Default role for unauthenticated users
