@@ -4,7 +4,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-print("🔥🔥🔥 custom_security.py MODULE LOADED 🔥🔥🔥", flush=True)
+print("DEBUG_CUSTOM_SECURITY_LOADED", flush=True)
 
 class CustomAirflowSecurityManager(AirflowSecurityManager):
 
