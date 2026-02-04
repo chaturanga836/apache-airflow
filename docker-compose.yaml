@@ -1,19 +1,5 @@
 version: '3.8'
 services:
-  dag-syncer:
-      image: minio/mc:latest
-      container_name: airflow-dag-sync
-      volumes:
-        - airflow-dag-storage:/dags
-      entrypoint: >
-        /bin/sh -c "
-        # 1. Connect to your MinIO instance (Update IP/Credentials if needed)
-        mc alias set myminio http://144.24.127.112:9000 minioadmin minioadmin;
-        # 2. Ensure the bucket exists
-        mc mb --ignore-existing myminio/airflow-dags;
-        # 3. Mirror MinIO to local volume and watch for changes (--watch)
-        mc mirror --watch --overwrite myminio/airflow-dags /dags;
-        "
   airflow-webserver:
     build: .
     container_name: airflow-server
