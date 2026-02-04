@@ -41,7 +41,7 @@ AUTH_LDAP_EMAIL_FIELD = "mail"
 AUTH_LDAP_GROUP_PULL_ALL_SEARCH = True
 # --- THE CRITICAL GROUP SEARCH FIXES ---
 AUTH_LDAP_GROUP_FIELD_IS_DN = True  # Your search used the full User DN
-AUTH_LDAP_GROUP_FIELD = "cn" 
+AUTH_LDAP_GROUP_FIELD = "member" 
 AUTH_LDAP_GROUP_SEARCH = "ou=groups,dc=crypto,dc=lake" # Broaden to root to ensure we don't miss ou=Groups
 AUTH_LDAP_GROUP_TYPE = "groupOfNames"
 AUTH_LDAP_GROUP_OBJECT_CLASS = "groupOfNames"
