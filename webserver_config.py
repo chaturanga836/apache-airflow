@@ -13,7 +13,7 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
 )
 
 CSRF_ENABLED = True
-SECRET_KEY = os.environ.get('AIRFLOW__WEBSERVER__SECRET_KEY', 'secure_static_key_here')
+SECRET_KEY = os.environ.get('AIRFLOW__API__SECRET_KEY', 'secure_static_key_here')
 
 # --- LDAP SSL CONFIGURATION ---
 AUTH_TYPE = AUTH_LDAP
@@ -26,7 +26,7 @@ AUTH_LDAP_ALLOW_SELF_SIGNED = True
 # Search & Bind
 AUTH_LDAP_SEARCH = "ou=users,dc=crypto,dc=lake"
 AUTH_LDAP_UID_FIELD = "uid"
-AUTH_LDAP_BIND_USER = "uid=admin,ou=users,dc=crypto,dc=lake"
+AUTH_LDAP_BIND_USER = "cn=admin,dc=crypto,dc=lake"
 AUTH_LDAP_BIND_PASSWORD = "SuperSecretCryptoPassword2026"
 AUTH_LDAP_BIND_DIRECT = False
 
@@ -41,21 +41,22 @@ AUTH_LDAP_EMAIL_FIELD = "mail"
 AUTH_LDAP_GROUP_PULL_ALL_SEARCH = True
 # --- THE CRITICAL GROUP SEARCH FIXES ---
 AUTH_LDAP_GROUP_FIELD_IS_DN = True  # Your search used the full User DN
-AUTH_LDAP_GROUP_FIELD = "cn" 
+AUTH_LDAP_GROUP_FIELD = "member" 
 AUTH_LDAP_GROUP_SEARCH = "ou=groups,dc=crypto,dc=lake" # Broaden to root to ensure we don't miss ou=Groups
 AUTH_LDAP_GROUP_TYPE = "groupOfNames"
+AUTH_LDAP_GROUP_OBJECT_CLASS = "groupOfNames"
 AUTH_LDAP_GROUP_SEARCH_SCOPE = 2 # Subtree search
 AUTH_LDAP_SEARCH_FILTER = "(objectClass=inetOrgPerson)" # Or whatever Anna's objectClass is
 AUTH_LDAP_GROUP_SEARCH_FILTER = "(objectClass=groupOfNames)"
 
-AUTH_LDAP_USER_REGISTRATION_FIELDS = ["uid", "mail", "sn", "description"]
-AUTH_LDAP_SEARCH_ATTRS = ["uid", "mail", "sn", "description"]
+AUTH_LDAP_USER_REGISTRATION_FIELDS = ["uid", "mail", "givenName", "sn", "description"]
+AUTH_LDAP_SEARCH_ATTRS = ["uid", "mail", "givenName", "sn", "description"]
 AUTH_LDAP_USE_NESTED_GROUPS_FOR_ROLES = False
 # Use EXACT strings from your successful ldapsearch
 AUTH_ROLES_MAPPING = {
-    "cn=admins,ou=groups,dc=crypto,dc=lake": ["Admin"],
-    "cn=FOX_COMP,ou=groups,dc=crypto,dc=lake": ["User"],
-    "cn=HR_DEP,ou=groups,dc=crypto,dc=lake": ["User"],
+    "admins": ["Admin"],
+    "HR_DEP": ["User"],
+    "FOX_COMP": ["Viewer"],
 }
 
 AUTH_LDAP_CONNECTION_OPTIONS = {
