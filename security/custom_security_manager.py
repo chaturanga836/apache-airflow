@@ -4,9 +4,12 @@ import logging
 
 log = logging.getLogger(__name__)
 
+print("🔥🔥🔥 custom_security.py MODULE LOADED 🔥🔥🔥", flush=True)
+
 class CustomAirflowSecurityManager(AirflowSecurityManager):
 
     def _search_ldap(self, ldap_mod, con, username):
+        
         """
         Override default LDAP user search
         """
