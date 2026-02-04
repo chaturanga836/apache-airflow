@@ -64,7 +64,7 @@ AUTH_LDAP_USE_NESTED_GROUPS_FOR_ROLES = False
 
 # Map LDAP group cn to Airflow roles
 AUTH_ROLES_MAPPING = {
-    "admins": ["Admin"],
+    "Administrator": ["Admin"],
     "HR_DEP": ["User"],
     "FOX_COMP": ["Viewer"],
 }
