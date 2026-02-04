@@ -50,7 +50,7 @@ AUTH_LDAP_EMAIL_FIELD = "mail"
 # LDAP GROUP SETTINGS
 # -------------------------------
 # Use the field in the LDAP group object that contains the user DN (for OpenLDAP: usually 'member')
-AUTH_LDAP_GROUP_FIELD = "member"
+AUTH_LDAP_GROUP_FIELD = "sn"
 AUTH_LDAP_GROUP_FIELD_IS_DN = True
 
 # LDAP group search
