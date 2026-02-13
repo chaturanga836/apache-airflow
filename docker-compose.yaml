@@ -11,7 +11,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - _AIRFLOW_WWW_USER_CREATE=false
       - PYTHONUNBUFFERED=1
-      # --- ADD THIS FOR AIRFLOW 3 LDAP/FAB ---
+      # Airflow 3 Auth Manager
       - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
       - AIRFLOW__API__SECRET_KEY=a8f3e1d5c4b9e7a2f1d8c6b4a9e3d2f7c8e1b9a6d4f3e2c7a1b8d5f9e4
     volumes:
@@ -21,9 +21,9 @@ services:
     ports:
       - "8080:8080"
     command: api-server
-    # Added healthcheck so the scheduler knows when the webserver is ready
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/webapp/health"]
+      # Airflow 3 standard health endpoint
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -31,14 +31,17 @@ services:
   airflow-scheduler:
     build: .
     container_name: airflow-scheduler
+    env_file:
+      - .env
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:2324@144.24.127.112:5432/airflow_db
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__API__SECRET_KEY=a8f3e1d5c4b9e7a2f1d8c6b4a9e3d2f7c8e1b9a6d4f3e2c7a1b8d5f9e4
+      # AIRFLOW 3 REQUIREMENT: Tell the scheduler how to reach the API server
+      - AIRFLOW__CORE__INTERNAL_API_URL=http://airflow-webserver:8080
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
-    # CHANGE HERE: Wait for the webserver to finish migrations
     depends_on:
       airflow-webserver:
         condition: service_healthy
