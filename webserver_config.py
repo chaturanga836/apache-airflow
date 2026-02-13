@@ -25,7 +25,8 @@ OAUTH_PROVIDERS = [
         "icon": "fa-key",
         "token_key": "access_token",
         "remote_app": {
-            "client_id": "airflow_admin",  # Matches your Keycloak Client ID
+            # Use the variable from .env instead of hardcoding 'airflow_admin'
+            "client_id": os.environ.get("AIRFLOW_CLIENT_ID"), 
             "client_secret": os.environ.get("AIRFLOW_CLIENT_SECRET"),
             "api_base_url": OIDC_BASE_URL,
             "access_token_url": f"{OIDC_BASE_URL}/token",
@@ -33,7 +34,7 @@ OAUTH_PROVIDERS = [
             "request_token_params": {"scope": "openid email profile groups"},
             "server_metadata_url": f"{OIDC_ISSUER}/.well-known/openid-configuration",
             "client_kwargs": {
-                "verify": False  # Use False only if your 144.24.x.x SSL is self-signed
+                "verify": False 
             }
         },
     }
