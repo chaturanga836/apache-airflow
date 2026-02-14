@@ -16,7 +16,10 @@ AUTH_USER_REGISTRATION_ROLE = "Public"
 AUTH_ROLES_SYNC_AT_LOGIN = True
 
 # Issuer from .env (e.g., https://144.24.127.112:8443/realms/datalake)
-OIDC_ISSUER = os.environ.get("AIRFLOW_OIDC_ISSUER")
+# ... existing imports ...
+
+# Match Trino's logic: No HTTPS, no Verify False needed (but safe to keep)
+OIDC_ISSUER = os.environ.get("AIRFLOW_OIDC_ISSUER") 
 OIDC_BASE_URL = f"{OIDC_ISSUER}/protocol/openid-connect"
 
 OAUTH_PROVIDERS = [
@@ -25,16 +28,14 @@ OAUTH_PROVIDERS = [
         "icon": "fa-key",
         "token_key": "access_token",
         "remote_app": {
-            # Use the variable from .env instead of hardcoding 'airflow_admin'
-            "client_id": os.environ.get("AIRFLOW_CLIENT_ID"), 
+            "client_id": os.environ.get("AIRFLOW_CLIENT_ID"),
             "client_secret": os.environ.get("AIRFLOW_CLIENT_SECRET"),
             "api_base_url": OIDC_BASE_URL,
             "access_token_url": f"{OIDC_BASE_URL}/token",
             "authorize_url": f"{OIDC_BASE_URL}/auth",
-            "request_token_params": {"scope": "openid email profile groups"},
             "server_metadata_url": f"{OIDC_ISSUER}/.well-known/openid-configuration",
             "client_kwargs": {
-                "verify": False 
+                "scope": "openid email profile groups"
             }
         },
     }
