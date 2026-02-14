@@ -1,6 +1,7 @@
 import os
 from flask_appbuilder.security.manager import AUTH_OAUTH
-
+from airflow.www.security import AirflowSecurityManager
+import jwt
 # --- CORE SETTINGS ---
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
@@ -47,3 +48,28 @@ AUTH_ROLES_MAPPING = {
     "airflow_admin": ["Admin"],
     "trino_admin": ["Admin"]
 }
+
+
+class CustomSecurityManager(AirflowSecurityManager):
+    def oauth_user_info(self, provider, response):
+        if provider == "keycloak":
+            token = response.get("access_token")
+            # Decode the token (no signature check needed as we trust the internal OIDC_ISSUER)
+            me = jwt.decode(token, options={"verify_signature": False})
+            
+            # Print to docker logs so you can see what's happening
+            # docker logs -f airflow-webserver
+            groups = me.get("groups", [])
+            print(f"DEBUG: Keycloak Groups found: {groups}")
+            
+            return {
+                "username": me.get("preferred_username"),
+                "email": me.get("email"),
+                "first_name": me.get("given_name"),
+                "last_name": me.get("family_name"),
+                "role_keys": groups, 
+            }
+        return {}
+
+# Crucial: Tell Airflow to use your custom class
+SECURITY_MANAGER_CLASS = CustomSecurityManager
