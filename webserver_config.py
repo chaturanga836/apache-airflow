@@ -5,6 +5,7 @@ from flask_appbuilder.security.manager import AUTH_OAUTH
 from airflow.providers.fab.auth_manager.security_manager.override import FabAirflowSecurityManagerOverride
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 # --- CORE SETTINGS ---
 SQLALCHEMY_DATABASE_URI = os.environ.get(
@@ -57,20 +58,35 @@ class CustomSecurityManager(FabAirflowSecurityManagerOverride):
     def oauth_user_info(self, provider, response):
         if provider == "keycloak":
             token = response.get("access_token")
+            log.info("===== OAUTH LOGIN START =====")
             # Decode without signature check because we trust the internal network issuer
-            me = jwt.decode(token, options={"verify_signature": False})
+            try:
+                me = jwt.decode(token, options={"verify_signature": False})
+                log.info("Full decoded token: %s", me)
+            except Exception as e:
+                log.error("JWT decode failed: %s", e)
+                return {}
             
             # CRITICAL: Check these logs to see the 'groups' or 'resource_access' keys!
-            print(f"DEBUG FULL TOKEN: {me}")
+            
 
             # 1. Try to get Realm-level Groups
             groups = me.get("groups", []) 
+            log.info("Groups claim: %s", groups)
             
+            if not groups:
+                realm_roles = me.get("realm_access", {}).get("roles", [])
+                log.info("Realm roles: %s", realm_roles)
+                groups = realm_roles
             # 2. If empty, try to get Client-level Roles (resource_access)
             if not groups:
                 client_id = os.environ.get("AIRFLOW_CLIENT_ID", "airflow")
-                groups = me.get("resource_access", {}).get(client_id, {}).get("roles", [])
+                client_roles = me.get("resource_access", {}).get(client_id, {}).get("roles", [])
+                log.info("Client roles: %s", client_roles)
+                groups = client_roles
 
+            log.info("Final role_keys sent to Airflow: %s", groups)
+            
             return {
                 "username": me.get("preferred_username"),
                 "email": me.get("email"),
