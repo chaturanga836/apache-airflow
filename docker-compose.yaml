@@ -13,6 +13,7 @@ services:
       - PYTHONUNBUFFERED=1
       # Airflow 3 Auth Manager
       - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      - AIRFLOW__WEBSERVER__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
       - AIRFLOW__WEBSERVER__WEB_SERVER_CONFIG=/opt/airflow/webserver_config.py
       - AIRFLOW__WEBSERVER__SECRET_KEY=9e4f3b2c8d7a6f1e0c5b4a9d8e7f6c3b1a2d4e6f8c0b9a7d5e3f1c4b6a8d2f0
       # - AIRFLOW__API__SECRET_KEY=a8f3e1d5c4b9e7a2f1d8c6b4a9e3d2f7c8e1b9a6d4f3e2c7a1b8d5f9e4
