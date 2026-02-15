@@ -13,12 +13,11 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
     "postgresql+psycopg2://postgres:2324@144.24.127.112:5432/airflow_db"
 )
 CSRF_ENABLED = True
-SECRET_KEY = os.environ.get('AIRFLOW__API__SECRET_KEY', 'secure_static_key_here')
 
 # --- OIDC / KEYCLOAK ---
 AUTH_TYPE = AUTH_OAUTH
 AUTH_USER_REGISTRATION = True
-AUTH_USER_REGISTRATION_ROLE = "Public"
+AUTH_USER_REGISTRATION_ROLE = "Viewer"
 AUTH_ROLES_SYNC_AT_LOGIN = True
 
 # Ensure this matches your Keycloak Realm URL
@@ -49,6 +48,7 @@ OAUTH_PROVIDERS = [
 AUTH_ROLES_MAPPING = {
     "Viewer": ["Viewer"],
     "Admin": ["Admin"],
+    "airflow_admin": ["Admin"],
     "User": ["User"],
     "Public": ["Public"],
     "Op": ["Op"],
