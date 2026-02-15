@@ -12,7 +12,7 @@ services:
       - _AIRFLOW_WWW_USER_CREATE=false
       - PYTHONUNBUFFERED=1
       # Airflow 3 Auth Manager
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      - AIRFLOW__WEBSERVER__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
       # - AIRFLOW__API__SECRET_KEY=a8f3e1d5c4b9e7a2f1d8c6b4a9e3d2f7c8e1b9a6d4f3e2c7a1b8d5f9e4
     volumes:
       - ./dags:/opt/airflow/dags
