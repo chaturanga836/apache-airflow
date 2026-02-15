@@ -8,6 +8,10 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
 log.info("✅ webserver_config.py loaded ✅")
+
+ENABLE_PROXY_FIX = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
 # --- CORE SETTINGS ---
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
