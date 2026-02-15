@@ -36,7 +36,4 @@ USER root
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Revert to airflow user for safety before finishing
-USER airflow
-
 ENTRYPOINT ["/entrypoint.sh"]
