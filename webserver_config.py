@@ -9,8 +9,10 @@ log.setLevel(logging.INFO)
 
 log.info("✅ webserver_config.py loaded ✅")
 
-ENABLE_PROXY_FIX = True
+SESSION_COOKIE_SECURE = False   # Essential since you are not using HTTPS
+SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
+FORCE_REVERSE_PROXY = True
 
 # --- CORE SETTINGS ---
 SQLALCHEMY_DATABASE_URI = os.environ.get(
