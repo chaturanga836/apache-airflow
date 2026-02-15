@@ -9,6 +9,11 @@ log.setLevel(logging.INFO)
 
 log.info("✅ webserver_config.py loaded ✅")
 
+CSRF_ENABLED = True
+WTF_CSRF_ENABLED = True
+# This ensures the CSRF cookie is sent even over HTTP
+WTF_CSRF_SSL_STRICT = False
+
 SESSION_COOKIE_SECURE = False   # Essential since you are not using HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
