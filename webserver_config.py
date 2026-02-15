@@ -7,6 +7,7 @@ from airflow.providers.fab.auth_manager.security_manager.override import FabAirf
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
+log.info("✅ webserver_config.py loaded ✅")
 # --- CORE SETTINGS ---
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
