@@ -2,39 +2,27 @@ import os
 import logging
 import jwt
 from flask_appbuilder.security.manager import AUTH_OAUTH
-from airflow.providers.fab.auth_manager.security_manager.override import FabAirflowSecurityManagerOverride
+# In Airflow 2.x, we override the standard AirflowSecurityManager
+from airflow.www.security import AirflowSecurityManager
 
-logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
-log.setLevel(logging.INFO)
-
-log.info("✅ webserver_config.py loaded ✅")
+# --- STABILITY SETTINGS (HTTP/PUBLIC IP) ---
+# Hardcode a static key. A dynamic key causes CSRF mismatches after restarts.
+SECRET_KEY = os.environ.get('AIRFLOW__WEBSERVER__SECRET_KEY', 'datalake_static_secret_key_12345')
 
 CSRF_ENABLED = True
-WTF_CSRF_ENABLED = True
-# This ensures the CSRF cookie is sent even over HTTP
-WTF_CSRF_SSL_STRICT = False
-
-SESSION_COOKIE_SECURE = False   # Essential since you are not using HTTPS
+SESSION_COOKIE_SECURE = False   # False for HTTP
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = None
-FORCE_REVERSE_PROXY = True
+SESSION_COOKIE_SAMESITE = 'Lax' # 'Lax' is more compatible with HTTP than 'None'
+ENABLE_PROXY_FIX = True
 
-# --- CORE SETTINGS ---
-SQLALCHEMY_DATABASE_URI = os.environ.get(
-    "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
-    "postgresql+psycopg2://postgres:2324@144.24.127.112:5432/airflow_db"
-)
-CSRF_ENABLED = True
-
-# --- OIDC / KEYCLOAK ---
+# --- AUTH SETTINGS ---
 AUTH_TYPE = AUTH_OAUTH
 AUTH_USER_REGISTRATION = True
-AUTH_USER_REGISTRATION_ROLE = "Viewer"
+AUTH_USER_REGISTRATION_ROLE = "Viewer" 
 AUTH_ROLES_SYNC_AT_LOGIN = True
 
-# Ensure this matches your Keycloak Realm URL
 OIDC_ISSUER = os.environ.get("AIRFLOW_OIDC_ISSUER", "http://144.24.127.112:8081/realms/datalake") 
 OIDC_BASE_URL = f"{OIDC_ISSUER}/protocol/openid-connect"
 
@@ -52,7 +40,6 @@ OAUTH_PROVIDERS = [
             "server_metadata_url": f"{OIDC_ISSUER}/.well-known/openid-configuration",
             "client_kwargs": {
                 "scope": "openid email profile groups",
-                "verify": False # Set to True if you have valid SSL certs
             }
         },
     }
@@ -60,47 +47,34 @@ OAUTH_PROVIDERS = [
 
 # --- ROLE MAPPING ---
 AUTH_ROLES_MAPPING = {
-    "Viewer": ["Viewer"],
     "Admin": ["Admin"],
     "airflow_admin": ["Admin"],
+    "Viewer": ["Viewer"],
     "User": ["User"],
-    "Public": ["Public"],
-    "Op": ["Op"],
 }
 
-class CustomSecurityManager(FabAirflowSecurityManagerOverride):
-    def oauth_user_info(self, provider, response):
+class CustomSecurityManager(AirflowSecurityManager):
+    def get_oauth_user_info(self, provider, resp):
+        # In 2.10.5, the method is get_oauth_user_info, not oauth_user_info
         if provider == "keycloak":
-            token = response.get("access_token")
+            token = resp.get("access_token")
+            # verify_signature=False is fine for internal metadata mapping
+            me = jwt.decode(token, options={"verify_signature": False})
+            
             log.info("===== OAUTH LOGIN START =====")
-            # Decode without signature check because we trust the internal network issuer
-            try:
-                me = jwt.decode(token, options={"verify_signature": False})
-                log.info("Full decoded token: %s", me)
-            except Exception as e:
-                log.error("JWT decode failed: %s", e)
-                return {}
             
-            # CRITICAL: Check these logs to see the 'groups' or 'resource_access' keys!
-            
-
-            # 1. Try to get Realm-level Groups
-            groups = me.get("groups", []) 
-            log.info("Groups claim: %s", groups)
-            
+            # Extract roles/groups from token
+            groups = me.get("groups", [])
             if not groups:
                 realm_roles = me.get("realm_access", {}).get("roles", [])
-                log.info("Realm roles: %s", realm_roles)
                 groups = realm_roles
-            # 2. If empty, try to get Client-level Roles (resource_access)
+            
             if not groups:
                 client_id = os.environ.get("AIRFLOW_CLIENT_ID", "airflow")
-                client_roles = me.get("resource_access", {}).get(client_id, {}).get("roles", [])
-                log.info("Client roles: %s", client_roles)
-                groups = client_roles
+                groups = me.get("resource_access", {}).get(client_id, {}).get("roles", [])
 
-            log.info("Final role_keys sent to Airflow: %s", groups)
-            
+            log.info("Final role_keys mapped for %s: %s", me.get("preferred_username"), groups)
+
             return {
                 "username": me.get("preferred_username"),
                 "email": me.get("email"),
