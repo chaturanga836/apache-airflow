@@ -4,7 +4,9 @@ import jwt
 from flask_appbuilder.security.manager import AUTH_OAUTH
 from airflow.providers.fab.auth_manager.security_manager.override import FabAirflowSecurityManagerOverride
 
+logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
+
 log.setLevel(logging.INFO)
 
 log.info("✅ webserver_config.py loaded ✅")
