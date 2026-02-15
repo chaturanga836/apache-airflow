@@ -1,6 +1,7 @@
 import os
 from flask_appbuilder.security.manager import AUTH_OAUTH
-from airflow.www.security import AirflowSecurityManager
+# ADD THIS
+from airflow.providers.fab.auth_manager.security_manager.override import FabAirflowSecurityManagerOverride
 import jwt
 # --- CORE SETTINGS ---
 SQLALCHEMY_DATABASE_URI = os.environ.get(
@@ -50,15 +51,13 @@ AUTH_ROLES_MAPPING = {
 }
 
 
-class CustomSecurityManager(AirflowSecurityManager):
+class CustomSecurityManager(FabAirflowSecurityManagerOverride):
     def oauth_user_info(self, provider, response):
         if provider == "keycloak":
             token = response.get("access_token")
-            # Decode the token (no signature check needed as we trust the internal OIDC_ISSUER)
+            # Decode the token (PyJWT must be installed in requirements.txt)
             me = jwt.decode(token, options={"verify_signature": False})
             
-            # Print to docker logs so you can see what's happening
-            # docker logs -f airflow-webserver
             groups = me.get("groups", [])
             print(f"DEBUG: Keycloak Groups found: {groups}")
             
@@ -71,5 +70,4 @@ class CustomSecurityManager(AirflowSecurityManager):
             }
         return {}
 
-# Crucial: Tell Airflow to use your custom class
 SECURITY_MANAGER_CLASS = CustomSecurityManager
