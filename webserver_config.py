@@ -3,6 +3,8 @@ from flask_appbuilder.security.manager import AUTH_OAUTH
 # ADD THIS
 from airflow.providers.fab.auth_manager.security_manager.override import FabAirflowSecurityManagerOverride
 import jwt
+
+log = logging.getLogger(__name__)
 # --- CORE SETTINGS ---
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
@@ -61,6 +63,7 @@ class CustomSecurityManager(FabAirflowSecurityManagerOverride):
             # We use verify=False because we are behind a trusted internal network
             me = jwt.decode(token, options={"verify_signature": False})
             
+            log.info("me: {0}".format(me))
             # DEBUG: This is the most important line for you right now
             # Check your docker logs to see what this prints!
             print(f"DEBUG FULL TOKEN: {me}")
@@ -72,13 +75,19 @@ class CustomSecurityManager(FabAirflowSecurityManagerOverride):
                 # Look for Client Roles as a backup (replace 'airflow' with your Client ID)
                 groups = me.get("resource_access", {}).get("airflow", {}).get("roles", [])
 
-            return {
+            log.info("groups: {0}".format(groups))
+            
+            userinfo = {
                 "username": me.get("preferred_username"),
                 "email": me.get("email"),
                 "first_name": me.get("given_name"),
                 "last_name": me.get("family_name"),
                 "role_keys": groups,
             }
+            
+            log.info("user info: {0}".format(userinfo))
+            
+            return userinfo
         return {}
 
 SECURITY_MANAGER_CLASS = CustomSecurityManager
