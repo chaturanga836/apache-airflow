@@ -46,8 +46,11 @@ OAUTH_PROVIDERS = [
 # --- ROLE MAPPING ---
 # Keycloak Groups -> Airflow Roles
 AUTH_ROLES_MAPPING = {
-    "airflow_admin": ["Admin"],
-    "trino_admin": ["Admin"]
+    "Viewer": ["Viewer"],
+    "Admin": ["Admin"],
+    "User": ["User"],
+    "Public": ["Public"],
+    "Op": ["Op"],
 }
 
 
@@ -55,18 +58,26 @@ class CustomSecurityManager(FabAirflowSecurityManagerOverride):
     def oauth_user_info(self, provider, response):
         if provider == "keycloak":
             token = response.get("access_token")
-            # Decode the token (PyJWT must be installed in requirements.txt)
+            # We use verify=False because we are behind a trusted internal network
             me = jwt.decode(token, options={"verify_signature": False})
             
-            groups = me.get("groups", [])
-            print(f"DEBUG: Keycloak Groups found: {groups}")
-            
+            # DEBUG: This is the most important line for you right now
+            # Check your docker logs to see what this prints!
+            print(f"DEBUG FULL TOKEN: {me}")
+
+            # The article expects roles here: me["resource_access"]["airflow-sso"]["roles"]
+            # But your config uses "groups". Let's try to find BOTH:
+            groups = me.get("groups", []) # Look for Realm Groups
+            if not groups:
+                # Look for Client Roles as a backup (replace 'airflow' with your Client ID)
+                groups = me.get("resource_access", {}).get("airflow", {}).get("roles", [])
+
             return {
                 "username": me.get("preferred_username"),
                 "email": me.get("email"),
                 "first_name": me.get("given_name"),
                 "last_name": me.get("family_name"),
-                "role_keys": groups, 
+                "role_keys": groups,
             }
         return {}
 
