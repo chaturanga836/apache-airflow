@@ -14,7 +14,7 @@ services:
 
       # --- KEYCLOAK / OIDC CONFIG ---
       - AIRFLOW__WEBSERVER__BASE_URL=http://13.200.160.10:8080
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.keycloak.auth_manager.keycloak_auth_manager.KeycloakAuthManager
+      
       # We extract the base URL from your OIDC_ISSUER (removing /realms/datalake)
       - AIRFLOW__KEYCLOAK_AUTH_MANAGER__SERVER_URL=http://13.200.160.10:8081/auth
       - AIRFLOW__KEYCLOAK_AUTH_MANAGER__REALM=datalake
@@ -49,7 +49,7 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       
       # Scheduler also needs the Auth Manager for API internal calls
-      - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.keycloak.auth_manager.keycloak_auth_manager.KeycloakAuthManager
+      
       - AIRFLOW__KEYCLOAK_AUTH_MANAGER__SERVER_URL=http://13.200.160.10:8081/auth
       - AIRFLOW__KEYCLOAK_AUTH_MANAGER__REALM=datalake
       
