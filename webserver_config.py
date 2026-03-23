@@ -21,7 +21,7 @@ AUTH_USER_REGISTRATION_ROLE = "Viewer"
 AUTH_ROLES_SYNC_AT_LOGIN = True
 
 # Use your actual Keycloak IP and Realm
-OIDC_ISSUER = os.environ.get("AIRFLOW_OIDC_ISSUER", "http://13.200.160.10:8081/realms/datalake") 
+OIDC_ISSUER = os.environ.get("AIRFLOW_OIDC_ISSUER", "http://13.200.160.10:8081/realms/etl-dev") 
 OIDC_BASE_URL = f"{OIDC_ISSUER}/protocol/openid-connect"
 
 OAUTH_PROVIDERS = [{
