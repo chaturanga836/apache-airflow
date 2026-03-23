@@ -1,12 +1,12 @@
 import os
 import logging
-import jwt
+import jwt  # Note: Ensure 'PyJWT' is installed in your Airflow environment
 from flask_appbuilder.security.manager import AUTH_OAUTH
 from airflow.www.security import AirflowSecurityManager
 
 log = logging.getLogger(__name__)
 
-# --- STABILITY SETTINGS ---
+# --- STABILITY & SESSION SETTINGS ---
 SECRET_KEY = os.environ.get('AIRFLOW__WEBSERVER__SECRET_KEY', 'datalake_static_secret_key_12345')
 CSRF_ENABLED = True
 SESSION_COOKIE_SECURE = False 
@@ -14,13 +14,14 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 ENABLE_PROXY_FIX = True
 
-# --- AUTH SETTINGS ---
+# --- AUTH TYPE SETTINGS ---
 AUTH_TYPE = AUTH_OAUTH
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Viewer" 
 AUTH_ROLES_SYNC_AT_LOGIN = True
 
-# Use your actual Keycloak IP and Realm
+# --- KEYCLOAK CONNECTION SETTINGS ---
+# Using the information from your Keycloak Console URLs
 OIDC_ISSUER = os.environ.get("AIRFLOW_OIDC_ISSUER", "http://13.200.160.10:8081/realms/etl-dev") 
 OIDC_BASE_URL = f"{OIDC_ISSUER}/protocol/openid-connect"
 
@@ -30,7 +31,7 @@ OAUTH_PROVIDERS = [{
     "token_key": "access_token",
     "remote_app": {
         "client_id": os.environ.get("AIRFLOW_CLIENT_ID", "airflow-cluster"),
-        "client_secret": os.environ.get("AIRFLOW_CLIENT_SECRET"),
+        "client_secret": os.environ.get("AIRFLOW_CLIENT_SECRET", "R07bsffOmZU2sOSmm7LJsGNJKWnnCTZw"),
         "api_base_url": OIDC_BASE_URL,
         "access_token_url": f"{OIDC_BASE_URL}/token",
         "authorize_url": f"{OIDC_BASE_URL}/auth",
@@ -40,10 +41,12 @@ OAUTH_PROVIDERS = [{
 }]
 
 # --- ROLE MAPPING ---
+# These keys on the left must match the ROLES defined in Keycloak exactly.
+# The values on the right are standard Airflow roles.
 AUTH_ROLES_MAPPING = {
     "Admin": ["Admin"],
     "airflow_admin": ["Admin"],
-    "Viever": ["Viewer"], # Keycloak 'Viever' -> Airflow 'Viewer'
+    "Viewer": ["Viewer"],  # Fixed typo from 'Viever'
     "User": ["User"],
 }
 
@@ -51,24 +54,40 @@ class CustomSecurityManager(AirflowSecurityManager):
     def get_oauth_user_info(self, provider, resp):
         if provider == "keycloak":
             token = resp.get("access_token")
-            # This requires 'PyJWT' to be installed
-            me = jwt.decode(token, options={"verify_signature": False})
-            
-            log.info("===== OAUTH LOGIN ATTEMPT: %s =====", me.get("preferred_username"))
-            
-            # Extract roles from realm_access (matches your Mapper setup)
-            groups = me.get("realm_access", {}).get("roles", [])
-            
-            if not groups:
-                groups = me.get("groups", [])
+            if not token:
+                log.error("No access_token received from Keycloak")
+                return {}
 
-            return {
-                "username": me.get("preferred_username"),
-                "email": me.get("email"),
-                "first_name": me.get("given_name"),
-                "last_name": me.get("family_name"),
-                "role_keys": groups,
-            }
-        return {}
+            try:
+                # Decode the JWT to read roles and user info without verifying signature 
+                # (Verification is handled by the OAuth flow internally)
+                me = jwt.decode(token, options={"verify_signature": False})
+                
+                username = me.get("preferred_username")
+                log.info(f"===== OAUTH LOGIN ATTEMPT: {username} =====")
+                
+                # 1. Try to get roles from 'realm_access' (Standard Keycloak location)
+                # 2. Fallback to 'groups' if you are using a Group Mapper
+                # 3. Fallback to 'resource_access' for client-specific roles
+                roles = me.get("realm_access", {}).get("roles", [])
+                if not roles:
+                    roles = me.get("groups", [])
+                if not roles:
+                    roles = me.get("resource_access", {}).get("airflow-cluster", {}).get("roles", [])
+
+                log.info(f"Detected Keycloak Roles for {username}: {roles}")
+
+                return {
+                    "username": username,
+                    "email": me.get("email"),
+                    "first_name": me.get("given_name", ""),
+                    "last_name": me.get("family_name", ""),
+                    "role_keys": roles,
+                }
+            except Exception as e:
+                log.error(f"Error decoding Keycloak token: {e}")
+                return {}
+        
+        return super().get_oauth_user_info(provider, resp)
 
 SECURITY_MANAGER_CLASS = CustomSecurityManager
