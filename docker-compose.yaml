@@ -34,10 +34,11 @@ services:
       - "8080:8080"
     command: webserver
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
+          test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+          interval: 30s        # Check every 30s
+          timeout: 20s         # Give the curl command 20s to respond
+          retries: 10          # Try 10 times
+          start_period: 90s    # IMPORTANT: Wait 90s before the first healthcheck
 
   airflow-scheduler:
     build: .

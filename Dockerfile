@@ -29,6 +29,7 @@ RUN pip install --no-cache-dir \
     "apache-airflow-providers-postgres" \
     "authlib" \
     "python-jose" \
+    "PyJWT" \
     --constraint "${CONSTRAINT_URL}"
 
 USER root
