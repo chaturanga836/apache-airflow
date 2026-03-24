@@ -60,21 +60,22 @@ class CustomSecurityManager(AirflowSecurityManager):
                 # Decode without verification for debugging roles
                 me = jwt.decode(token, options={"verify_signature": False})
                 username = me.get("preferred_username")
-                
                 log.info(f"===== OAUTH LOGIN ATTEMPT: {username} =====")
                 
-                # Extract Realm Roles
+                # 1. Get Realm Roles (usually default-roles)
                 realm_roles = me.get("realm_access", {}).get("roles", [])
                 
-                # Extract Client Roles for 'airflow-cluster'
-                res_access = me.get("resource_access", {})
-                client_roles = res_access.get("airflow-cluster", {}).get("roles", [])
+                # 2. Get the TOP-LEVEL roles (where your 'Admin' is currently sitting)
+                top_level_roles = me.get("roles", [])
                 
-                # Log the structure to see if Keycloak is nesting them differently
-                log.debug(f"Resource Access Keys found: {list(res_access.keys())}")
+                # 3. Get Group Roles (if any)
+                group_roles = me.get("groups", [])
                 
-                # Merge lists
-                all_roles = list(set(realm_roles + client_roles))
+                # 4. Get Client Roles (Fallback for standard Keycloak structure)
+                client_roles = me.get("resource_access", {}).get("airflow-cluster", {}).get("roles", [])
+                
+                # Merge EVERYTHING into one list
+                all_roles = list(set(realm_roles + top_level_roles + group_roles + client_roles))
 
                 log.info(f"Detected Keycloak Roles for {username}: {all_roles}")
 
