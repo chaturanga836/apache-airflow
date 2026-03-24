@@ -1,6 +1,6 @@
 import os
 import logging
-import jwt  # Note: Ensure 'PyJWT' is installed in your Airflow environment
+import jwt
 from flask_appbuilder.security.manager import AUTH_OAUTH
 from airflow.www.security import AirflowSecurityManager
 
@@ -20,8 +20,6 @@ AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Viewer" 
 AUTH_ROLES_SYNC_AT_LOGIN = True
 
-# --- KEYCLOAK CONNECTION SETTINGS ---
-# Using the information from your Keycloak Console URLs
 OIDC_ISSUER = os.environ.get("AIRFLOW_OIDC_ISSUER", "http://13.200.160.10:8081/realms/etl-dev") 
 OIDC_BASE_URL = f"{OIDC_ISSUER}/protocol/openid-connect"
 
@@ -40,13 +38,13 @@ OAUTH_PROVIDERS = [{
     }
 }]
 
-# --- ROLE MAPPING ---
-# These keys on the left must match the ROLES defined in Keycloak exactly.
-# The values on the right are standard Airflow roles.
+# --- IMPROVED ROLE MAPPING ---
+# We map the Keycloak role string to the Airflow role list
 AUTH_ROLES_MAPPING = {
     "Admin": ["Admin"],
+    "admin": ["Admin"], # Added lowercase fallback
     "airflow_admin": ["Admin"],
-    "Viewer": ["Viewer"],  # Fixed typo from 'Viever'
+    "Viewer": ["Viewer"],
     "User": ["User"],
 }
 
@@ -59,30 +57,33 @@ class CustomSecurityManager(AirflowSecurityManager):
                 return {}
 
             try:
-                # Decode the JWT to read roles and user info without verifying signature 
-                # (Verification is handled by the OAuth flow internally)
+                # Decode without verification for debugging roles
                 me = jwt.decode(token, options={"verify_signature": False})
-                
                 username = me.get("preferred_username")
+                
                 log.info(f"===== OAUTH LOGIN ATTEMPT: {username} =====")
                 
-                # 1. Try to get roles from 'realm_access' (Standard Keycloak location)
-                # 2. Fallback to 'groups' if you are using a Group Mapper
-                # 3. Fallback to 'resource_access' for client-specific roles
-                roles = me.get("realm_access", {}).get("roles", [])
-                if not roles:
-                    roles = me.get("groups", [])
-                if not roles:
-                    roles = me.get("resource_access", {}).get("airflow-cluster", {}).get("roles", [])
+                # Extract Realm Roles
+                realm_roles = me.get("realm_access", {}).get("roles", [])
+                
+                # Extract Client Roles for 'airflow-cluster'
+                res_access = me.get("resource_access", {})
+                client_roles = res_access.get("airflow-cluster", {}).get("roles", [])
+                
+                # Log the structure to see if Keycloak is nesting them differently
+                log.debug(f"Resource Access Keys found: {list(res_access.keys())}")
+                
+                # Merge lists
+                all_roles = list(set(realm_roles + client_roles))
 
-                log.info(f"Detected Keycloak Roles for {username}: {roles}")
+                log.info(f"Detected Keycloak Roles for {username}: {all_roles}")
 
                 return {
                     "username": username,
                     "email": me.get("email"),
                     "first_name": me.get("given_name", ""),
                     "last_name": me.get("family_name", ""),
-                    "role_keys": roles,
+                    "role_keys": all_roles,
                 }
             except Exception as e:
                 log.error(f"Error decoding Keycloak token: {e}")
