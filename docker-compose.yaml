@@ -25,6 +25,7 @@ services:
       - AIRFLOW__WEBSERVER__WEB_SERVER_CONFIG=/opt/airflow/webserver_config.py
       - AIRFLOW__WEBSERVER__SECRET_KEY=9e4f3b2c8d7a6f1e0c5b4a9d8e7f6c3b1a2d4e6f8c0b9a7d5e3f1c4b6a8d2f0
       - AIRFLOW__WEBSERVER__COOKIE_SECURE=False
+      - AIRFLOW__API__AUTH_BACKENDS=airflow.api.auth.backend.session,airflow.api.auth.backend.basic_auth
 
     volumes:
       - ./dags:/opt/airflow/dags
