@@ -14,8 +14,6 @@ services:
 
       # --- KEYCLOAK / OIDC CONFIG ---
       - AIRFLOW__WEBSERVER__BASE_URL=http://13.200.160.10:8080
-      
-      # We extract the base URL from your OIDC_ISSUER (removing /realms/datalake)
       - AIRFLOW__KEYCLOAK_AUTH_MANAGER__SERVER_URL=http://13.200.160.10:8081/auth
       - AIRFLOW__KEYCLOAK_AUTH_MANAGER__REALM=etl-dev
       - AIRFLOW__KEYCLOAK_AUTH_MANAGER__CLIENT_ID=${AIRFLOW_CLIENT_ID}
@@ -25,6 +23,8 @@ services:
       - AIRFLOW__WEBSERVER__WEB_SERVER_CONFIG=/opt/airflow/webserver_config.py
       - AIRFLOW__WEBSERVER__SECRET_KEY=9e4f3b2c8d7a6f1e0c5b4a9d8e7f6c3b1a2d4e6f8c0b9a7d5e3f1c4b6a8d2f0
       - AIRFLOW__WEBSERVER__COOKIE_SECURE=False
+      
+      # FIX 1: Ensure basic_auth is present to handle the Bearer token processing
       - AIRFLOW__API__AUTH_BACKENDS=airflow.api.auth.backend.session,airflow.api.auth.backend.basic_auth
 
     volumes:
@@ -35,11 +35,11 @@ services:
       - "8080:8080"
     command: webserver
     healthcheck:
-          test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-          interval: 30s        # Check every 30s
-          timeout: 20s         # Give the curl command 20s to respond
-          retries: 10          # Try 10 times
-          start_period: 90s    # IMPORTANT: Wait 90s before the first healthcheck
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 90s
 
   airflow-scheduler:
     build: .
@@ -50,13 +50,15 @@ services:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:2324@13.200.160.10:5432/airflow_db
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       
-      # Scheduler also needs the Auth Manager for API internal calls
-      
+      # FIX 2: REALM MUST MATCH (Changed 'datalake' to 'etl-dev')
       - AIRFLOW__KEYCLOAK_AUTH_MANAGER__SERVER_URL=http://13.200.160.10:8081/auth
-      - AIRFLOW__KEYCLOAK_AUTH_MANAGER__REALM=datalake
+      - AIRFLOW__KEYCLOAK_AUTH_MANAGER__REALM=etl-dev
+      
+      # FIX 3: INTERNAL API URL MUST MATCH SERVICE NAME
+      # Your service is named 'airflow-webserver', not 'airflow-server'
+      - AIRFLOW__CORE__INTERNAL_API_URL=http://airflow-webserver:8080
       
       - AIRFLOW__API__SECRET_KEY=a8f3e1d5c4b9e7a2f1d8c6b4a9e3d2f7c8e1b9a6d4f3e2c7a1b8d5f9e4
-      - AIRFLOW__CORE__INTERNAL_API_URL=http://airflow-webserver:8080
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
