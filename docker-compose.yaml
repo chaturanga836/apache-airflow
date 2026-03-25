@@ -26,7 +26,7 @@ services:
       
       # FIX 1: Ensure basic_auth is present to handle the Bearer token processing
       - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-      - AIRFLOW__API__AUTH_BACKENDS=airflow.providers.fab.auth_manager.api.auth.backend.basic_auth
+      - AIRFLOW__API__AUTH_BACKENDS=airflow.providers.fab.auth_manager.api.auth.backend.session
 
     volumes:
       - ./dags:/opt/airflow/dags

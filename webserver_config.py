@@ -92,5 +92,35 @@ class CustomSecurityManager(AirflowSecurityManager):
                 return {}
         
         return super().get_oauth_user_info(provider, resp)
+    
+    def before_request(self):
+        """
+        Force the REST API to recognize the Bearer token for OIDC users.
+        """
+        from flask import g, request
+        
+        # 1. If user is already authenticated (UI), let them through
+        if g.get("user") and g.user.is_authenticated:
+            return super().before_request()
+
+        # 2. Check for Bearer token in the Authorization header
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            try:
+                # Decode to find the username (we already trust the sig via Keycloak)
+                payload = jwt.decode(token, options={"verify_signature": False})
+                username = payload.get("preferred_username")
+                
+                if username:
+                    # Look up the user 'service-account-airflow-worker' in the DB
+                    user = self.find_user(username=username)
+                    if user:
+                        g.user = user  # Manually sign them in for this request
+                        log.info(f"API AUTH SUCCESS: {username}")
+            except Exception as e:
+                log.error(f"API JWT Error: {e}")
+        
+        return super().before_request()
 
 SECURITY_MANAGER_CLASS = CustomSecurityManager
