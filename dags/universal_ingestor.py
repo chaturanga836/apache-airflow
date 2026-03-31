@@ -48,11 +48,14 @@ def sync_and_convert_logic(**kwargs):
     return silver_records
 
 def load_to_silver(**kwargs):
+    
     ti = kwargs['ti']
     conf = kwargs['dag_run'].conf
     records = ti.xcom_pull(task_ids='process_data_task')
     
-    hook = PostgresHook(postgres_conn_id='postgres_default')
+    target_conn_id = conf.get('target_conn_id', 'etl_db_conn')
+    
+    hook = PostgresHook(postgres_conn_id=target_conn_id)
     
     # Bulk Insert into Silver Layer
     for rec in records:
